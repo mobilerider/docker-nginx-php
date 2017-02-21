@@ -1,0 +1,6 @@
+FROM mobilerider/nginx-php:latest
+
+COPY ./ /var/www/
+
+RUN chown -R root:www-data /var/www && \
+    chmod -R 0770 /var/www
