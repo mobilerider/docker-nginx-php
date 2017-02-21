@@ -5,8 +5,8 @@ MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 ARG environment=production
 ARG time_zone=America/Denver
 ARG nginx_conf=config/nginx/nginx.conf
-ARG nginx_site=config/nginx/sites-enabled/default.conf
-ARG super_conf=config/supervisord.conf
+ARG nginx_site=config/nginx/default.conf
+ARG supervisord_conf=config/supervisord/supervisord.conf
 
 ENV APPLICATION_ENV=${environment}
 ENV DEBIAN_FRONTEND noninteractive
@@ -63,7 +63,7 @@ COPY ${nginx_site} /etc/nginx/sites-enabled/default
 # COPY config/php/www.conf /etc/php/7.0/fpm/pool.d/www.conf
 
 # Configure supervisord
-COPY ${super_conf} /etc/supervisord.conf
+COPY ${supervisord_conf} /etc/supervisord.conf
 
 # Configure php.ini
 RUN sed -i \
