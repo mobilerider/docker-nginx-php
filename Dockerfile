@@ -2,6 +2,9 @@ FROM ubuntu:trusty
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
+LABEL version="2.0.0"
+LABEL php-version="7.1"
+
 ARG environment=production
 ARG time_zone=America/Denver
 ARG nginx_conf=config/nginx/nginx.conf
