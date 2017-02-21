@@ -14,7 +14,6 @@ docker build -t my_image --build-arg environment=production --build-arg nginx_si
 ```
 docker run -p 80:80 my_image
 ```
-3- Go to [http://192.168.99.100/](http://192.168.99.100/).
 
 ### Posible arguments
 - environment
