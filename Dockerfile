@@ -4,9 +4,9 @@ MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
 ARG environment=production
 ARG time_zone=America/Denver
-ARG nginx_conf=config/nginx/nginx.${environment}.conf
-ARG nginx_site=config/nginx/sites-enabled/default.${environment}.conf
-ARG super_conf=config/supervisord.${environment}.conf
+ARG nginx_conf=config/nginx/nginx.conf
+ARG nginx_site=config/nginx/sites-enabled/default.conf
+ARG super_conf=config/supervisord.conf
 
 ENV APPLICATION_ENV=${environment}
 ENV DEBIAN_FRONTEND noninteractive
