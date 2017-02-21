@@ -1,0 +1,98 @@
+FROM ubuntu:trusty
+
+MAINTAINER Michel Perez <michel.perez@mobilerider.com>
+
+ARG environment=production
+ARG time_zone=America/Denver
+ARG nginx_conf=config/nginx/nginx.${environment}.conf
+ARG nginx_site=config/nginx/sites-enabled/default.${environment}.conf
+ARG super_conf=config/supervisord.${environment}.conf
+
+ENV APPLICATION_ENV=${environment}
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update \
+    && apt-get -y --no-install-recommends install \
+        python-setuptools \
+        software-properties-common \
+        python-software-properties \
+        language-pack-en-base \
+        nodejs \
+        git \
+        curl \
+        wget \
+        vim \
+        nginx \
+        supervisor
+
+# Add repository
+RUN PPAPHP7=" ppa:ondrej/php" && \
+    export LC_ALL=en_US.UTF-8 && \
+    export LANG=en_US.UTF-8 && \
+    add-apt-repository $PPAPHP7 \
+    && apt-get update
+
+# Install packages
+RUN apt-get dist-upgrade -y \
+    && apt-get -y install \
+        php7.1 \
+        php7.1-common \
+        php7.1-dom \
+        php7.1-fpm \
+        php7.1-mbstring \
+        php7.1-mcrypt \
+        php7.1-pdo \
+        php7.1-xml \
+        php7.1-phar \
+        php7.1-json \
+        php7.1-gd \
+        php-memcached \
+        php-redis
+
+# clear apt cache and remove unnecessary packages
+RUN apt-get autoclean && apt-get -y autoremove
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+
+# Configure Nginx
+COPY ${nginx_conf} /etc/nginx/nginx.conf
+COPY ${nginx_site} /etc/nginx/sites-enabled/default
+
+# Configure PHP-FPM
+# COPY config/php/php.ini /etc/php7.0/conf.d/zzz_custom.ini
+# COPY config/php/www.conf /etc/php/7.0/fpm/pool.d/www.conf
+
+# Configure supervisord
+COPY ${super_conf} /etc/supervisord.conf
+
+# Configure php.ini
+RUN sed -i \
+    -e "s/^expose_php.*/expose_php = Off/" \
+    -e "s/^;date.timezone.*/date.timezone = America\/Denver/" \
+    -e "s/^memory_limit.*/memory_limit = -1/" \
+    -e "s/^max_execution_time.*/max_execution_time = 60/" \
+    -e "s/^post_max_size.*/post_max_size = 50M/" \
+    -e "s/^upload_max_filesize.*/upload_max_filesize = 50M/" \
+    /etc/php/7.1/fpm/php.ini
+
+# Configure php-fpm.ini
+RUN sed -i \
+    -e "s/^error_log.*/error_log = \/proc\/self\/fd\/2/" \
+    -e "s/^access_log.*/access_log = \/proc\/self\/fd\/2/" \
+    -e "s/;daemonize\s*=\s*yes/daemonize = no/g" \
+    /etc/php/7.1/fpm/php-fpm.conf
+
+# Create folder for fpm.sock
+RUN mkdir /run/php/
+
+# Add application
+RUN mkdir -p /var/www
+WORKDIR /var/www
+COPY ./ /var/www/
+
+RUN chown -R root:www-data /var/www && \
+    chmod -R 0770 /var/www
+
+EXPOSE 80
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
