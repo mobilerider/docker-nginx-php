@@ -33,8 +33,7 @@ RUN PPAPHP7=" ppa:ondrej/php" && \
     && apt-get update
 
 # Install packages
-RUN apt-get dist-upgrade -y \
-    && apt-get -y install \
+RUN apt-get -y install \
         php7.1 \
         php7.1-common \
         php7.1-dom \
