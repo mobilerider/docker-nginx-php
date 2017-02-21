@@ -2,18 +2,22 @@
 
 ### Installation.
 
-1- Build image
+1- Build image.
+```
+docker build -t my_image .
+```
+- 1.1 - Build image passing multiple arguments. (Optional)
 ```
 docker build -t my_image --build-arg environment=production --build-arg nginx_site=my_config/my_site.conf .
 ```
-2- Run container binding 80 port to host
+2- Run container binding 80 port to host.
 ```
 docker run -p 80:80 my_image
 ```
-3- Go to [http://192.168.99.100/](http://192.168.99.100/)
+3- Go to [http://192.168.99.100/](http://192.168.99.100/).
 
 ### Posible arguments
 - environment
 - nginx_conf
 - nginx_site
-- super_conf
+- supervisord_conf
