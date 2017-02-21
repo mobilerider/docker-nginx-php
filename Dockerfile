@@ -13,14 +13,11 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
-        python-setuptools \
         software-properties-common \
         python-software-properties \
         language-pack-en-base \
-        nodejs \
         git \
         curl \
-        wget \
         vim \
         nginx \
         supervisor
