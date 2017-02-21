@@ -86,10 +86,6 @@ RUN mkdir /run/php/
 # Add application
 RUN mkdir -p /var/www
 WORKDIR /var/www
-COPY ./ /var/www/
-
-RUN chown -R root:www-data /var/www && \
-    chmod -R 0770 /var/www
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
