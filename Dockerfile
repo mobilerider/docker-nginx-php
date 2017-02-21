@@ -8,6 +8,7 @@ ARG nginx_conf=config/nginx/nginx.conf
 ARG nginx_site=config/nginx/default.conf
 ARG supervisord_conf=config/supervisord/supervisord.conf
 
+ENV APP_ENV=${environment}
 ENV APPLICATION_ENV=${environment}
 ENV DEBIAN_FRONTEND noninteractive
 
