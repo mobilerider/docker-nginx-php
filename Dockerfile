@@ -62,6 +62,10 @@ RUN apt-get autoclean && apt-get -y autoremove
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
+# Install PEAR
+RUN curl http://pear.php.net/go-pear.phar --output go-pear.phar && \
+    php go-pear.phar
+
 # Configure Nginx
 COPY ${nginx_conf} /etc/nginx/nginx.conf
 COPY ${nginx_site} /etc/nginx/sites-enabled/default

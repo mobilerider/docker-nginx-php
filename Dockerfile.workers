@@ -59,6 +59,10 @@ RUN apt-get autoclean && apt-get -y autoremove
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
+# Install PEAR
+RUN curl http://pear.php.net/go-pear.phar --output go-pear.phar && \
+    php go-pear.phar
+
 # Configure supervisord
 COPY ${supervisord_conf} /etc/supervisord.conf
 
