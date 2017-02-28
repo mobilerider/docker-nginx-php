@@ -90,6 +90,11 @@ RUN sed -i \
     -e "s/;daemonize\s*=\s*yes/daemonize = no/g" \
     /etc/php/7.1/fpm/php-fpm.conf
 
+# Configure php-fpm worker
+RUN sed -i \
+    -e "s/;clear_env.*/clear_env = no/g" \
+    /etc/php/7.1/fpm/pool.d/www.conf
+
 # Create folder for fpm.sock
 RUN mkdir /run/php/
 
