@@ -1,0 +1,78 @@
+FROM ubuntu:trusty
+
+MAINTAINER Michel Perez <michel.perez@mobilerider.com>
+
+LABEL version="2.0.0"
+LABEL php-version="7.1"
+
+ARG environment=production
+ARG time_zone=America/Denver
+ARG supervisord_conf=config/supervisord/supervisord.workers.conf
+
+ENV APP_ENV=${environment}
+ENV APPLICATION_ENV=${environment}
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update \
+    && apt-get -y --no-install-recommends install \
+        software-properties-common \
+        python-software-properties \
+        language-pack-en-base \
+        git \
+        curl \
+        vim \
+        zip \
+        unzip \
+        nginx \
+        supervisor
+
+# Add repository
+RUN PPAPHP7=" ppa:ondrej/php" && \
+    export LC_ALL=en_US.UTF-8 && \
+    export LANG=en_US.UTF-8 && \
+    add-apt-repository $PPAPHP7 \
+    && apt-get update
+
+# Install packages
+RUN apt-get -y install \
+        php7.1 \
+        php7.1-common \
+        php7.1-dom \
+        php7.1-mbstring \
+        php7.1-mcrypt \
+        php7.1-mysql \
+        php7.1-pdo \
+        php7.1-xml \
+        php7.1-phar \
+        php7.1-json \
+        php7.1-gd \
+        php7.1-curl \
+        php7.1-bcmath \
+        php7.1-soap \
+        php7.1-zip \
+        php-memcached \
+        php-redis
+
+# clear apt cache and remove unnecessary packages
+RUN apt-get autoclean && apt-get -y autoremove
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+
+# Configure supervisord
+COPY ${supervisord_conf} /etc/supervisord.conf
+
+# Configure php.ini
+RUN sed -i \
+    -e "s/^expose_php.*/expose_php = Off/" \
+    -e "s/^;date.timezone.*/date.timezone = America\/Denver/" \
+    -e "s/^memory_limit.*/memory_limit = -1/" \
+    -e "s/^max_execution_time.*/max_execution_time = 0/" \
+    -e "s/^file_uploads.*/file_uploads=Off/" \
+    /etc/php/7.1/cli/php.ini
+
+# Add application
+RUN mkdir -p /var/www
+WORKDIR /var/www
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
