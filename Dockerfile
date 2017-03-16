@@ -2,8 +2,8 @@ FROM ubuntu:trusty
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
-LABEL version="2.0.2"
-LABEL php-version="7.1"
+LABEL version="2.0.3"
+LABEL php.version="7.1"
 
 ARG environment=production
 ARG time_zone=America/Denver
@@ -99,6 +99,17 @@ RUN sed -i \
 RUN sed -i \
     -e "s/;clear_env.*/clear_env = no/g" \
     /etc/php/7.1/fpm/pool.d/www.conf
+
+# Enables opcache
+RUN { \
+        echo 'opcache.enable=1'; \
+        echo 'opcache.memory_consumption=128'; \
+        echo 'opcache.interned_strings_buffer=8'; \
+        echo 'opcache.max_accelerated_files=4000'; \
+        echo 'opcache.validate_timestamps=0'; \
+        echo 'opcache.fast_shutdown=1'; \
+        echo 'opcache.enable_cli=1'; \
+    } >> /etc/php/7.1/fpm/conf.d/10-opcache.ini
 
 # Create folder for fpm.sock
 RUN mkdir /run/php/
