@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM ubuntu:artful
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
@@ -29,7 +29,7 @@ RUN apt-get update \
         supervisor
 
 # Add repository
-RUN PPAPHP7=" ppa:ondrej/php" && \
+RUN PPAPHP7="ppa:ondrej/php" && \
     export LC_ALL=en_US.UTF-8 && \
     export LANG=en_US.UTF-8 && \
     add-apt-repository $PPAPHP7 \
@@ -65,8 +65,7 @@ RUN apt-get autoclean && apt-get -y autoremove
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 # Install PEAR
-RUN curl http://pear.php.net/go-pear.phar --output go-pear.phar && \
-    php go-pear.phar
+RUN apt-get install php-pear
 
 # Configure Nginx
 COPY ${nginx_conf} /etc/nginx/nginx.conf
