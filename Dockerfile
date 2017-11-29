@@ -2,7 +2,7 @@ FROM ubuntu:artful
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
-LABEL version="2.1.0"
+LABEL version="2.1.1"
 LABEL php.version="7.1"
 
 ARG environment=production
