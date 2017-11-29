@@ -2,7 +2,7 @@ FROM ubuntu:trusty
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
-LABEL version="2.0.4"
+LABEL version="2.0.5"
 LABEL php.version="7.1"
 
 ARG environment=production
@@ -54,6 +54,7 @@ RUN apt-get -y install \
         php7.1-soap \
         php7.1-zip \
         php7.1-geoip \
+        php7.1-intl \
         php-memcached \
         php-redis
 
