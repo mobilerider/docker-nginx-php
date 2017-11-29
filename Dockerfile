@@ -2,11 +2,11 @@ FROM ubuntu:trusty
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
-LABEL version="2.0.5"
+LABEL version="2.1.0"
 LABEL php.version="7.1"
 
 ARG environment=production
-ARG time_zone=America/Denver
+ARG time_zone=UTC
 ARG nginx_conf=config/nginx/nginx.conf
 ARG nginx_site=config/nginx/default.conf
 ARG supervisord_conf=config/supervisord/supervisord.conf
@@ -82,7 +82,7 @@ COPY ${supervisord_conf} /etc/supervisord.conf
 # Configure php.ini
 RUN sed -i \
     -e "s/^expose_php.*/expose_php = Off/" \
-    -e "s/^;date.timezone.*/date.timezone = America\/Denver/" \
+    -e "s/^;date.timezone.*/date.timezone = ${time_zone}/" \
     -e "s/^memory_limit.*/memory_limit = -1/" \
     -e "s/^max_execution_time.*/max_execution_time = 60/" \
     -e "s/^post_max_size.*/post_max_size = 50M/" \
