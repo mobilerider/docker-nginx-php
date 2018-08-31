@@ -1,4 +1,4 @@
-FROM ubuntu:artful
+FROM ubuntu:xenial
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
