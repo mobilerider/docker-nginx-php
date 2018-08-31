@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
-LABEL version="2.1.1"
+LABEL version="2.2.0"
 LABEL php.version="7.1"
 
 ARG environment=production
