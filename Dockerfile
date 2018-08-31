@@ -55,6 +55,7 @@ RUN apt-get -y install \
         php7.1-zip \
         php7.1-geoip \
         php7.1-intl \
+        php-apcu \
         php-memcached \
         php-redis
 
