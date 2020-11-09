@@ -2,8 +2,8 @@ FROM ubuntu:xenial
 
 MAINTAINER Michel Perez <michel.perez@mobilerider.com>
 
-LABEL version="2.2.0"
-LABEL php.version="7.1"
+LABEL version="2.3.4"
+LABEL php.version="7.3"
 
 ARG environment=production
 ARG time_zone=UTC
@@ -26,7 +26,8 @@ RUN apt-get update \
         zip \
         unzip \
         nginx \
-        supervisor
+        supervisor \
+        apt-utils
 
 # Add repository
 RUN PPAPHP7="ppa:ondrej/php" && \
@@ -35,38 +36,61 @@ RUN PPAPHP7="ppa:ondrej/php" && \
     add-apt-repository $PPAPHP7 \
     && apt-get update
 
+# Create folder for fpm.sock
+RUN mkdir /run/php/
+RUN touch /run/php/php7.3-fpm.sock
+RUN chown -R www-data:www-data /run/php/
+RUN chmod -R 0660 /run/php/
+
 # Install packages
 RUN apt-get -y install \
-        php7.1 \
-        php7.1-common \
-        php7.1-dom \
-        php7.1-fpm \
-        php7.1-mbstring \
-        php7.1-mcrypt \
-        php7.1-mysql \
-        php7.1-pdo \
-        php7.1-xml \
-        php7.1-phar \
-        php7.1-json \
-        php7.1-gd \
-        php7.1-curl \
-        php7.1-bcmath \
-        php7.1-soap \
-        php7.1-zip \
-        php7.1-geoip \
-        php7.1-intl \
+        php7.3 \
+        php7.3-fpm \
+        php7.3-common \
+        php7.3-dom \
+        php7.3-mbstring \
+        php7.3-mysql \
+        php7.3-pdo \
+        php7.3-xml \
+        php7.3-phar \
+        php7.3-json \
+        php7.3-gd \
+        php7.3-curl \
+        php7.3-bcmath \
+        php7.3-soap \
+        php7.3-zip \
+        php7.3-geoip \
+        php7.3-intl \
+        php7.3-sqlite3 \
         php-apcu \
         php-memcached \
         php-redis
+
+# Install PEAR (PECL) and dev for extensions
+RUN apt-get install -y php-pear php7.3-dev
+
+# Prepare mcrypt install
+RUN apt-get -y install gcc make autoconf libc-dev pkg-config \
+    libmcrypt-dev
+
+# Allow PECL to parse php.ini by removing -n
+# othersise it can't find the required php-xml
+# RUN sed -i "$ s|\-n||g" /usr/bin/pecl
+
+# Or require only the XML extension
+# pecl needs xml extension and since we build it as shared, it must be
+# explicitly declared to be loaded.
+#RUN sed -i 's/\$INCARG/& -d extension=xml.so/' \
+#    "$pkgdir"/usr/bin/pecl || return 1
+
+# Install mcrypt
+RUN /usr/bin/pecl install mcrypt-1.0.2
 
 # clear apt cache and remove unnecessary packages
 RUN apt-get autoclean && apt-get -y autoremove
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
-
-# Install PEAR
-RUN apt-get install php-pear
 
 # Configure Nginx
 COPY ${nginx_conf} /etc/nginx/nginx.conf
@@ -85,22 +109,22 @@ RUN sed -i \
     -e "s/^;date.timezone.*/date.timezone = ${time_zone}/" \
     -e "s/^memory_limit.*/memory_limit = -1/" \
     -e "s/^max_execution_time.*/max_execution_time = 60/" \
-    -e "s/^post_max_size.*/post_max_size = 50M/" \
-    -e "s/^upload_max_filesize.*/upload_max_filesize = 50M/" \
-    /etc/php/7.1/fpm/php.ini
+    -e "s/^post_max_size.*/post_max_size = 10M/" \
+    -e "s/^upload_max_filesize.*/upload_max_filesize = 10M/" \
+    /etc/php/7.3/fpm/php.ini
 
 # Configure php-fpm.ini
 RUN sed -i \
     -e "s/^error_log.*/error_log = \/proc\/self\/fd\/2/" \
     -e "s/^access_log.*/access_log = \/proc\/self\/fd\/2/" \
     -e "s/;daemonize\s*=\s*yes/daemonize = no/g" \
-    /etc/php/7.1/fpm/php-fpm.conf
+    /etc/php/7.3/fpm/php-fpm.conf
 
 # Configure php-fpm worker
 RUN sed -i \
     -e "s/;clear_env.*/clear_env = no/g" \
     -e "s/;catch_workers_output.*/catch_workers_output = yes/g" \
-    /etc/php/7.1/fpm/pool.d/www.conf
+    /etc/php/7.3/fpm/pool.d/www.conf
 
 # Enables opcache
 RUN { \
@@ -111,10 +135,7 @@ RUN { \
         echo 'opcache.validate_timestamps=0'; \
         echo 'opcache.fast_shutdown=1'; \
         echo 'opcache.enable_cli=1'; \
-    } >> /etc/php/7.1/fpm/conf.d/10-opcache.ini
-
-# Create folder for fpm.sock
-RUN mkdir /run/php/
+    } >> /etc/php/7.3/fpm/conf.d/10-opcache.ini
 
 # Add application
 RUN mkdir -p /var/www

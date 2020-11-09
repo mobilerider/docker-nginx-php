@@ -1,4 +1,4 @@
-# Dockerfile for php7.1, php7.1-fpm and nginx
+# Dockerfile for php7.3, php7.3-fpm and nginx
 
 ### Installation.
 
