@@ -66,6 +66,10 @@ RUN apt-get -y install \
         php-memcached \
         php-redis
 
+# Install Node.js
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash && \
+    apt-get -y install nodejs
+
 # Install PEAR (PECL) and dev for extensions
 RUN apt-get install -y php-pear php7.3-dev
 
