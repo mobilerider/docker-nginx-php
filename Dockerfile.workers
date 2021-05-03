@@ -1,8 +1,6 @@
 FROM ubuntu:xenial
 
-MAINTAINER Michel Perez <michel.perez@mobilerider.com>
-
-LABEL version="1.3.0"
+LABEL version="1.4.2"
 LABEL php.version="7.3"
 
 ARG environment=production
@@ -26,6 +24,13 @@ RUN apt-get update \
         nginx \
         supervisor \
         apt-utils
+
+# Add repository
+RUN PPAPHP7="ppa:ondrej/php" && \
+    export LC_ALL=en_US.UTF-8 && \
+    export LANG=en_US.UTF-8 && \
+    add-apt-repository $PPAPHP7 \
+    && apt-get update
 
 # Create folder for fpm.sock
 RUN mkdir /run/php/
@@ -63,17 +68,31 @@ RUN apt-get install -y php-pear php7.3-dev
 RUN apt-get -y install gcc make autoconf libc-dev pkg-config \
     libmcrypt-dev
 
+# Allow PECL to parse php.ini by removing -n
+# othersise it can't find the required php-xml
+# RUN sed -i "$ s|\-n||g" /usr/bin/pecl
+
+# Or require only the XML extension
+# pecl needs xml extension and since we build it as shared, it must be
+# explicitly declared to be loaded.
+#RUN sed -i 's/\$INCARG/& -d extension=xml.so/' \
+#    "$pkgdir"/usr/bin/pecl || return 1
+
+# Install mcrypt
+RUN /usr/bin/pecl install mcrypt-1.0.2
+
 # clear apt cache and remove unnecessary packages
 RUN apt-get autoclean && apt-get -y autoremove
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+RUN php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+RUN php composer-setup.php --install-dir=/usr/bin/
+RUN php -r "unlink('composer-setup.php');"
+RUN ln -s /usr/bin/composer.phar /usr/bin/composer && chmod a+x /usr/bin/composer
 
 # Install PEAR
 RUN apt-get install php-pear
-
-# Configure supervisord
-COPY ${supervisord_conf} /etc/supervisord.conf
 
 # Configure php.ini
 RUN sed -i \
