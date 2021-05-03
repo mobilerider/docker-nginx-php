@@ -1,8 +1,6 @@
 FROM ubuntu:xenial
 
-MAINTAINER Michel Perez <michel.perez@mobilerider.com>
-
-LABEL version="2.3.4"
+LABEL version="2.4.0"
 LABEL php.version="7.3"
 
 ARG environment=production
@@ -94,7 +92,10 @@ RUN /usr/bin/pecl install mcrypt-1.0.2
 RUN apt-get autoclean && apt-get -y autoremove
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+RUN php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+RUN php composer-setup.php
+RUN php -r "unlink('composer-setup.php');"
 
 # Configure Nginx
 COPY ${nginx_conf} /etc/nginx/nginx.conf
